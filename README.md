@@ -35,7 +35,7 @@ public interface Api {
     Result<Personnel> post(@RequestBody Personnel personnel);
 }
 
-// 配置文件
+// application.yml 配置文件
 /*
 feign:
 # 远程服务访问路径 没有不填写
