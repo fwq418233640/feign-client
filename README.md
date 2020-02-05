@@ -17,7 +17,7 @@ public class ProducerFeignClientTest {
 
 // api 接口上添加  org.ch.feignclent.annotation.FeignClient 注解
 /**
- * 生产者提供的 api 接口
+ * 远程服务提供者提供的 api 接口
  */
 @FeignClient
 @RequestMapping(value = "/api")
@@ -65,6 +65,27 @@ public class ConsumerFeignClientTest {
     public void testPost(){
         Result<Personnel> result = this.api.post(new Personnel("IronMan"));
         System.out.println(result);
+    }
+}
+
+
+// 远程服务提供者
+// 普通 Rest 接口
+/**
+ * 服务提供者
+ */
+@RestController
+@RequestMapping(value = "/api")
+public class PersonnelController {
+
+    @RequestMapping(value = "/get", method = RequestMethod.GET)
+    public Result<String> get(@RequestParam String name){
+        return Result.success(name);
+    }
+
+    @RequestMapping(value = "/post", method = RequestMethod.POST)
+    public Result<Personnel> post(Personnel personnel) {
+        return Result.success(personnel);
     }
 }
 ```
