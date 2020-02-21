@@ -20,6 +20,7 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -35,11 +36,17 @@ import java.util.Set;
 public class ApiProxyBeanRegistry implements BeanDefinitionRegistryPostProcessor
         , ResourceLoaderAware, ApplicationContextAware {
 
+
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
+
         Environment environment = getEnvironment();
-        String property = environment.getProperty("feign.scan-path");
-        Set<Class<?>> beanClazzs = scannerPackages(property);
+        String scanPath = environment.getProperty("feign.scan-path");
+        if (StringUtils.isEmpty(scanPath)) {
+            scanPath = this.getClass().getClassLoader().getResource("").getPath();
+            System.out.println(scanPath);
+        }
+        Set<Class<?>> beanClazzs = scannerPackages(scanPath);
         for (Class<?> beanClazz : beanClazzs) {
             Annotation annotation = beanClazz.getDeclaredAnnotation(FeignClient.class);
             if (annotation != null) {
@@ -65,8 +72,16 @@ public class ApiProxyBeanRegistry implements BeanDefinitionRegistryPostProcessor
      */
     private Set<Class<?>> scannerPackages(String basePackage) {
         Set<Class<?>> set = new LinkedHashSet<>();
-        String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
-                resolveBasePackage(basePackage) + '/' + DEFAULT_RESOURCE_PATTERN;
+
+        String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX;
+
+        if (basePackage == null) {
+            packageSearchPath += DEFAULT_RESOURCE_PATTERN;
+        } else {
+            String resolveBasePackage = resolveBasePackage(basePackage);
+            packageSearchPath += resolveBasePackage + '/' + DEFAULT_RESOURCE_PATTERN;
+        }
+
         try {
             Resource[] resources = this.resourcePatternResolver.getResources(packageSearchPath);
             for (Resource resource : resources) {
@@ -74,7 +89,8 @@ public class ApiProxyBeanRegistry implements BeanDefinitionRegistryPostProcessor
                     MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(resource);
                     String className = metadataReader.getClassMetadata().getClassName();
                     Class<?> clazz;
-                    try {
+                    try { // Handler$Initializer
+                        System.out.println("   | " + resource);
                         clazz = Class.forName(className);
                         set.add(clazz);
                     } catch (ClassNotFoundException e) {
@@ -93,7 +109,8 @@ public class ApiProxyBeanRegistry implements BeanDefinitionRegistryPostProcessor
     }
 
     @Override
-    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {}
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+    }
 
     private ResourcePatternResolver resourcePatternResolver;
 

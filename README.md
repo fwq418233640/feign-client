@@ -4,22 +4,10 @@
 
 ```java
 // 基本用法
-// 启动类上添加 EnableFeignClientAutoConfig 注解
-
-@SpringBootApplication
-@EnableFeignClientAutoConfig
-public class ProducerFeignClientTest {
-
-    public static void main(String[] args) {
-        SpringApplication.run(ProducerFeignClientTest.class, args);
-    }
-}
-
-// api 接口上添加  org.ch.feignclent.annotation.FeignClient 注解
+// 生产者
 /**
  * 远程服务提供者提供的 api 接口
  */
-@FeignClient
 @RequestMapping(value = "/api")
 public interface Api {
     /**
@@ -34,41 +22,6 @@ public interface Api {
     @RequestMapping(value = "/post", method = RequestMethod.POST)
     Result<Personnel> post(@RequestBody Personnel personnel);
 }
-
-// application.yml 配置文件
-/*
-feign:
-# 远程服务访问路径 没有不填写
-  context-path:
-# 远程服务端口
-  port: 8041
-# 扫描路径
-  scan-path: feignclient
-# 远程服务地址
-  server-address: 127.0.0.1
-*/
-
-// 使用
-@Component
-public class ConsumerFeignClientTest {
-
-    @Autowired
-    private Api api;
-
-    @Test
-    public void testGet(){
-        Result<String> result = this.api.get("Spider Man");
-        System.out.println(result);
-    }
-    
-    @Test
-    public void testPost(){
-        Result<Personnel> result = this.api.post(new Personnel("IronMan"));
-        System.out.println(result);
-    }
-}
-
-
 // 远程服务提供者
 // 普通 Rest 接口
 /**
@@ -86,6 +39,57 @@ public class PersonnelController {
     @RequestMapping(value = "/post", method = RequestMethod.POST)
     public Result<Personnel> post(Personnel personnel) {
         return Result.success(personnel);
+    }
+}
+
+
+
+
+//  -----------------------------------------
+// 消费者使用
+
+// application.yml 配置文件
+/*
+feign:
+// 扫描路径
+  scan-path: com.ikingtech.api
+// 服务地址
+  server-list: device=127.0.0.1:3306
+*/
+
+// 启动类
+
+@SpringBootApplication
+@EnableFeignClientAutoConfig
+public class ProducerFeignClientTest {
+
+    public static void main(String[] args) {
+        SpringApplication.run(ProducerFeignClientTest.class, args);
+    }
+}
+// 在使用的地方定义一个接口继承 需要使用的Api 使用 @FeignClient 注解标注
+// 并且设置服务名称
+@FeignClient(server="device")
+public interface DeviceApiClient extends Api{
+
+}
+
+@Component
+public class ConsumerFeignClientTest {
+
+    @Autowired
+    private Api api;
+
+    @Test
+    public void testGet(){
+        Result<String> result = this.api.get("Spider Man");
+        System.out.println(result);
+    }
+    
+    @Test
+    public void testPost(){
+        Result<Personnel> result = this.api.post(new Personnel("IronMan"));
+        System.out.println(result);
     }
 }
 ```

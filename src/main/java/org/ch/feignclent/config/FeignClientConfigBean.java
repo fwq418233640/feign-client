@@ -13,22 +13,14 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @Configuration
 @ConfigurationProperties(prefix = "feign")
-@EnableConfigurationProperties({FeignClientConfig.class})
-public class FeignClientConfig {
-    /**
-     * 服务地址
-     */
-    private String serverAddress;
-    /**
-     * 服务端口
-     */
-    private String port;
-    /**
-     * 服务路径
-     */
-    private String contextPath;
+@EnableConfigurationProperties({FeignClientConfigBean.class})
+public class FeignClientConfigBean {
     /**
      * 扫描 feignClient 标记类的路径
      */
     private String scanPath;
+    /**
+     * 服务列表 服务=127.0.0.1:3306
+     */
+    private String[] serverList;
 }

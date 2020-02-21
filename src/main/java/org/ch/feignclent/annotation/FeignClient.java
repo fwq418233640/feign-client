@@ -14,4 +14,23 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface FeignClient {
 
+    /**
+     * 服务
+     */
+    String server();
+
+    /**
+     * 端口
+     */
+    String port() default "";
+
+    /**
+     * 服务地址
+     */
+    String serverIpAddr() default "";
+
+    /**
+     * 访问路径
+     */
+    String contextPath() default "";
 }

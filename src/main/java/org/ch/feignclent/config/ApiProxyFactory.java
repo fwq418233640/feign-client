@@ -27,7 +27,7 @@ public class ApiProxyFactory<T> implements FactoryBean<T> {
     @Override
     public T getObject() throws Exception {
         //  这里主要是创建接口对应的实例，便于注入到spring容器中
-        InvocationHandler handler = new ApiProxy(environment);
+        InvocationHandler handler = new ApiProxy(interfaceType,environment);
         return (T) Proxy.newProxyInstance(interfaceType.getClassLoader(), new Class[]{interfaceType}, handler);
     }
 
