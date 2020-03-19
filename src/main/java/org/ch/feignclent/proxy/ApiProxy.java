@@ -6,6 +6,7 @@ import feign.gson.GsonEncoder;
 import feign.spring.SpringContract;
 import lombok.extern.slf4j.Slf4j;
 import org.ch.feignclent.annotation.FeignClient;
+import org.ch.feignclent.config.RequestConfiguration;
 import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
 
@@ -74,7 +75,9 @@ public class ApiProxy implements InvocationHandler {
                     uri = "http://" + address;
                 }
 
+
                 Object target = Feign.builder()
+                        .requestInterceptor(new RequestConfiguration())
                         .contract(new SpringContract())
                         .encoder(new GsonEncoder())
                         .decoder(new GsonDecoder())
